@@ -1,11 +1,23 @@
 package fracCalc;
 
+import java.io.IOException;
+import java.util.Scanner;
+
 public class FracCalc {
 
-    public static void main(String[] args) 
+    public static void main(String[] args) throws IOException 
     {
         // TODO: Read the input from the user and call produceAnswer with an equation
-
+        Scanner sc = new Scanner(System.in);
+        while (true) {
+            String input = sc.nextLine();
+            if (input.equals("quit")) {
+                break;
+            } else {
+                System.out.println(produceAnswer(input));
+            }
+        }
+        sc.close();
     }
     
     // ** IMPORTANT ** DO NOT DELETE THIS FUNCTION.  This function will be used to test your code
@@ -19,10 +31,9 @@ public class FracCalc {
     public static String produceAnswer(String input)
     { 
         // TODO: Implement this function to produce the solution to the input
-        
-        return "";
+        String values[] = input.split(" ");
+        return values[2];
     }
 
     // TODO: Fill in the space below with any helper methods that you think you will need
-    
 }
