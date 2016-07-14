@@ -58,6 +58,12 @@ public class FracCalc {
     // TODO: Fill in the space below with any helper methods that you think you will need
 
     public static class MixedFraction {
+    	
+    	// The convention of this class is that the value should
+    	// always be (whole + numerator / denominator)
+    	// That means for a negative mixed fraction, like -2_1/2, whole must be negative,
+    	// and either the numerator or the denominator and numerator should also be negative.
+    	// (Preferably the numerator).
     	public long whole = 0;
     	public long numerator = 0;
     	public long denominator = 1;
@@ -138,6 +144,9 @@ public class FracCalc {
     	public MixedFraction reduced() {
     		MixedFraction retval = copy();
     		long gcd = gcd(numerator, denominator);
+    		if (gcd < 0) {
+    			gcd *= -1;
+    		}
     		retval.numerator /= gcd;
     		retval.denominator /= gcd;
     		return retval;
@@ -147,6 +156,7 @@ public class FracCalc {
     	 * Returns a version of the fraction as an improper fraction, where whole is zero.
     	 * This also forces the denominator to be positive.
     	 * This is the form used for most of the calculations.
+    	 * Note that this is not necessarily reduced.
     	 * @return
     	 */
     	public MixedFraction improper() {
@@ -161,7 +171,13 @@ public class FracCalc {
     	}
 
     	/**
-    	 * Returns a string version of the fraction in mixed form.
+    	 * Returns a version of the fraction in mixed form.
+    	 * This also guarantees that the denominator will be
+    	 * positive.  Note that if the number is positive,
+    	 * whole, numerator, and denominator will all be positive (or zero).
+    	 * If the number is negative, both whole and numerator
+    	 * will be negative (or zero).
+    	 * Note that it will not necessarily be reduced.
     	 * @return
     	 */
     	public MixedFraction mixed() {
@@ -189,7 +205,8 @@ public class FracCalc {
     	}
     	
     	/**
-    	 * Returns the reciprocal of the number, in improper form.  Also forces the denominator to be positive.
+    	 * Returns the reciprocal of the number, in improper form.
+    	 * Also forces the denominator to be positive.
     	 * @return
     	 */
     	public MixedFraction reciprocal() {
@@ -206,7 +223,6 @@ public class FracCalc {
     	
     	/**
     	 * Euler's GCD algorithm (https://en.wikipedia.org/wiki/Greatest_common_divisor#Using_Euclid.27s_algorithm)
-    	 * Except we always return a positive number.
     	 * 
     	 * @param a
     	 * @param b
@@ -215,9 +231,6 @@ public class FracCalc {
     	public static long gcd(long a, long b) {
     		while (true) {
     			if (b == 0) {
-    				if (a < 0) {
-    					return -a;
-    				}
     				return a;
     			} else {
     				long temp = a % b;
