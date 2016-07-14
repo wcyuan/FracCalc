@@ -1,11 +1,25 @@
 package fracCalc;
 
 import org.junit.Test;
+import static org.junit.Assert.*;
 
 // Checkpoint 3-only tests
 public class FracCalcTestCheckpoint3
 {
-    @Test public void testCheckpoint3_AdditionSimple3() {FracCalcTestALL.assertForEarlyCheckpoints(null, null, "4_3/7", FracCalc.produceAnswer("1_1/7 + 3_2/7"));}
+    @Test public void testCheckpoint3_Neg() {
+    	assertEquals("neg", "-15/4", FracCalc.MixedFraction.fromString("-3_3/4").improper().toString());
+    }
+
+    @Test public void testCheckpoint3_mixed() {
+    	assertEquals("neg", "10/4", FracCalc.MixedFraction.fromString("2_2/4").improper().toString());
+    }
+
+    @Test public void testCheckpoint3_mixed2() {
+    	assertEquals("neg", "5/2", FracCalc.MixedFraction.fromString("2_2/4").improper().reduced().toString());
+    }
+
+    
+	@Test public void testCheckpoint3_AdditionSimple3() {FracCalcTestALL.assertForEarlyCheckpoints(null, null, "4_3/7", FracCalc.produceAnswer("1_1/7 + 3_2/7"));}
     @Test public void testCheckpoint3_AdditionWholeNumbers2() {FracCalcTestALL.assertForEarlyCheckpoints(null, null, "1", FracCalc.produceAnswer("2/3 + 1/3"));}
     @Test public void testCheckpoint3_AdditionWholeNumbers7() {FracCalcTestALL.assertForEarlyCheckpoints(null, null, "1021778", FracCalc.produceAnswer("124543 + 897235"));}
     @Test public void testCheckpoint3_AdditionWithNegatives4() {FracCalcTestALL.assertForEarlyCheckpoints(null, null, "-1_1/4", FracCalc.produceAnswer("-3_3/4 + 2_2/4"));}

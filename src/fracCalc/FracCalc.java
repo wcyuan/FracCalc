@@ -32,15 +32,35 @@ public class FracCalc {
     { 
         // TODO: Implement this function to produce the solution to the input
         String values[] = input.split(" ");
-        return values[2];
+        MixedFraction value = MixedFraction.fromString(values[0]);
+        for (int ii = 1; ii < values.length; ii += 2) {
+            MixedFraction v2 = MixedFraction.fromString(values[ii+1]);
+        	switch (values[ii]) {
+        	case "+":
+        		value = value.add(v2);
+        		break;
+        	case "-":
+        		value = value.sub(v2);
+        		break;
+        	case "*":
+        		value = value.mult(v2);
+        		break;
+        	case "/":
+        		value = value.div(v2);
+        		break;
+        	default:
+        		throw new RuntimeException("Invalid operator: " + values[ii]);
+        	}
+        }
+        return value.toString();
     }
 
     // TODO: Fill in the space below with any helper methods that you think you will need
 
     public static class MixedFraction {
-    	public int whole = 0;
-    	public int numerator = 0;
-    	public int denominator = 1;
+    	public long whole = 0;
+    	public long numerator = 0;
+    	public long denominator = 1;
 
         /**
          * Parse a single value.  From the spec:
@@ -65,19 +85,22 @@ public class FracCalc {
     		String fraction = null;
         	if (value.contains("_")) {
         		String values[] = value.split("_");
-        		retval.whole = Integer.parseInt(values[0]);
+        		retval.whole = Long.parseLong(values[0]);
         		fraction = values[1];
         	} else if (value.contains("/")) {
         		fraction = value;
         	} else {
-        		retval.whole = Integer.parseInt(value);
+        		retval.whole = Long.parseLong(value);
         	}
 
         	if (fraction != null) {
         		if (fraction.contains("/")) {
         			String values[] = fraction.split("/");
-        			retval.numerator = Integer.parseInt(values[0]);
-        			retval.denominator = Integer.parseInt(values[1]);
+        			retval.numerator = Long.parseLong(values[0]);
+        			retval.denominator = Long.parseLong(values[1]);
+        			if (retval.whole < 0) {
+        				retval.numerator *= -1;
+        			}
         		}
         	}
         	
@@ -90,12 +113,145 @@ public class FracCalc {
 
     	public String toString() {
     		if (numerator == 0) {
-    			return Integer.toString(whole);
+    			return Long.toString(whole);
     		} else if (whole == 0) {
     			return "" + numerator + "/" + denominator;
     		} else {
-    			return "" + whole + "_" + numerator + "/" + denominator;    			
+    			if (whole > 0) {
+        			return "" + whole + "_" + numerator + "/" + denominator;    				
+    			} else {
+        			return "" + whole + "_" + -numerator + "/" + denominator;    				
+    			}
     		}
+    	}
+
+    	// In general, the methods below return copies, they don't mutate the object.
+    	
+    	public MixedFraction copy() {
+    		MixedFraction retval = new MixedFraction();
+    		retval.whole = whole;
+    		retval.numerator = numerator;
+    		retval.denominator = denominator;
+    		return retval;
+    	}
+    	
+    	public MixedFraction reduced() {
+    		MixedFraction retval = copy();
+    		long gcd = gcd(numerator, denominator);
+    		retval.numerator /= gcd;
+    		retval.denominator /= gcd;
+    		return retval;
+    	}
+
+    	/**
+    	 * Returns a version of the fraction as an improper fraction, where whole is zero.
+    	 * This also forces the denominator to be positive.
+    	 * This is the form used for most of the calculations.
+    	 * @return
+    	 */
+    	public MixedFraction improper() {
+    		MixedFraction retval = new MixedFraction();
+    		retval.denominator = denominator;
+			retval.numerator = denominator * whole + numerator;
+			if (retval.denominator < 0) {
+				retval.denominator *= -1;
+				retval.numerator *= -1;
+			}
+    		return retval;
+    	}
+
+    	/**
+    	 * Returns a string version of the fraction in mixed form.
+    	 * @return
+    	 */
+    	public MixedFraction mixed() {
+    		MixedFraction retval = new MixedFraction();
+    		int whole_sign = 1, num_sign = 1, den_sign = 1;
+    		if (whole < 0) {
+    			whole_sign = -1;
+    			whole *= -1;
+    		}
+    		if (numerator < 0) {
+    			num_sign = -1;
+    			numerator *= -1;
+    		}
+    		if (denominator < 0) {
+    			den_sign = -1;
+    			denominator *= -1;
+    		}
+    		int sign = whole_sign * num_sign * den_sign;
+    		retval.whole = whole + numerator / denominator;
+    		retval.numerator = numerator % denominator;
+    		retval.denominator = denominator;
+    		retval.whole *= sign;
+    		retval.numerator *= sign;
+    		return retval;
+    	}
+    	
+    	/**
+    	 * Returns the reciprocal of the number, in improper form.  Also forces the denominator to be positive.
+    	 * @return
+    	 */
+    	public MixedFraction reciprocal() {
+    		MixedFraction a = improper();
+    		long temp = a.denominator;
+    		a.denominator = a.numerator;
+    		a.numerator = temp;
+			if (a.denominator < 0) {
+				a.denominator *= -1;
+				a.numerator *= -1;
+			}
+    		return a;
+    	}
+    	
+    	/**
+    	 * Euler's GCD algorithm (https://en.wikipedia.org/wiki/Greatest_common_divisor#Using_Euclid.27s_algorithm)
+    	 * Except we always return a positive number.
+    	 * 
+    	 * @param a
+    	 * @param b
+    	 * @return
+    	 */
+    	public static long gcd(long a, long b) {
+    		while (true) {
+    			if (b == 0) {
+    				if (a < 0) {
+    					return -a;
+    				}
+    				return a;
+    			} else {
+    				long temp = a % b;
+    				a = b;
+    				b = temp;
+    			}
+    		}
+    	}
+
+    	public MixedFraction add(MixedFraction other) {
+    		MixedFraction a = improper();
+    		other = other.improper();
+    		a.numerator *= other.denominator;
+    		a.numerator += other.numerator * a.denominator;
+    		a.denominator *= other.denominator;
+    		return a.reduced().mixed();
+    	}
+
+    	public MixedFraction mult(MixedFraction other) {
+    		MixedFraction a = improper();
+    		other = other.improper();
+    		a.numerator *= other.numerator;
+    		a.denominator *= other.denominator;
+    		return a.reduced().mixed();
+    	}
+
+    	public MixedFraction div(MixedFraction other) {
+    		return mult(other.reciprocal());
+    	}
+
+    	public MixedFraction sub(MixedFraction other) {
+    		other = other.improper();
+    		other.numerator *= -1;
+    		return add(other);
     	}
     }
 
