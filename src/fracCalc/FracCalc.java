@@ -32,6 +32,155 @@ public class FracCalc {
     { 
         // TODO: Implement this function to produce the solution to the input
         String values[] = input.split(" ");
+        String improper = toImproperFraction(values[0]);
+		long numerator = getFractionNumerator(improper);
+		long denominator = getFractionDenominator(improper);
+        for (int ii = 1; ii < values.length; ii += 2) {
+            String v2improper = toImproperFraction(values[ii+1]);
+    		long v2numerator = getFractionNumerator(v2improper);
+    		long v2denominator = getFractionDenominator(v2improper);
+        	
+        	switch (values[ii]) {
+        	case "+":
+        		numerator *= v2denominator;
+        		numerator += v2numerator * denominator;
+        		denominator *= v2denominator;
+        		break;
+        	case "-":
+        		numerator *= v2denominator;
+        		numerator -= v2numerator * denominator;
+        		denominator *= v2denominator;
+        		break;
+        	case "*":
+        		numerator *= v2numerator;
+        		denominator *= v2denominator;
+        		break;
+        	case "/":
+        		numerator *= v2denominator;
+        		denominator *= v2numerator;
+        		break;
+        	default:
+        		throw new RuntimeException("Invalid operator: " + values[ii]);
+        	}
+        }
+        return toMixedFraction(reduce(numerator, denominator));
+    }
+
+    // TODO: Fill in the space below with any helper methods that you think you will need
+
+    // ------------------------------------------------------------------------------ //
+    // Below is a solution if you do not use classes
+    // Instead, pass everything around as a string, and have functions
+    // that convert from one format to another, or to extract parts of
+    // a string
+
+    public static String toImproperFraction(String value) {
+		String fraction = null;
+    	long whole = 0;
+    	long numerator = 0;
+    	long denominator = 1;
+
+    	if (value.contains("_")) {
+    		String values[] = value.split("_");
+    		whole = Long.parseLong(values[0]);
+    		fraction = values[1];
+    	} else if (value.contains("/")) {
+    		fraction = value;
+    	} else {
+    		whole = Long.parseLong(value);
+    	}
+
+    	if (fraction != null) {
+    		numerator = getFractionNumerator(fraction);
+    		denominator = getFractionDenominator(fraction);
+    		if (whole < 0) {
+    			numerator *= -1;
+    		}
+    	}
+    	
+    	// Convert to an improper fraction
+		numerator = denominator * whole + numerator;
+		if (denominator < 0) {
+			denominator *= -1;
+			numerator *= -1;
+		}
+    	return makeFractionString(numerator, denominator);
+    }
+
+    public static String makeFractionString(long numerator, long denominator) {
+    	return numerator + "/" + denominator;
+    }
+    
+    public static long getFractionNumerator(String fraction) {
+		if (fraction.contains("/")) {
+			String values[] = fraction.split("/");
+			return Long.parseLong(values[0]);
+		} else {
+			return Long.parseLong(fraction);
+		}
+    }
+
+    public static long getFractionDenominator(String fraction) {
+		if (fraction.contains("/")) {
+			String values[] = fraction.split("/");
+			return Long.parseLong(values[1]);
+		} else {
+			return 1;
+		}
+    }
+
+    public static String toMixedFraction(String fraction) {
+		int num_sign = 1, den_sign = 1;
+		long numerator = getFractionNumerator(fraction);
+		long denominator = getFractionDenominator(fraction);
+		if (numerator < 0) {
+			num_sign = -1;
+			numerator *= -1;
+		}
+		if (denominator < 0) {
+			den_sign = -1;
+			denominator *= -1;
+		}
+		int sign = num_sign * den_sign;
+
+		long whole = numerator / denominator;
+		numerator = numerator % denominator;
+		whole *= sign;
+		numerator *= sign;
+		return makeMixedFractionString(whole, numerator, denominator);
+    }
+    
+    public static String makeMixedFractionString(long whole, long numerator, long denominator) {
+		if (numerator == 0) {
+			return Long.toString(whole);
+		} else if (whole == 0) {
+			return "" + numerator + "/" + denominator;
+		} else {
+			if (whole > 0) {
+    			return "" + whole + "_" + numerator + "/" + denominator;
+			} else {
+    			return "" + whole + "_" + -numerator + "/" + denominator;
+			}
+		}
+	}
+
+	public static String reduce(long numerator, long denominator) {
+		long gcd = MixedFraction.gcd(numerator, denominator);
+		if (gcd < 0) {
+			gcd *= -1;
+		}
+		numerator /= gcd;
+		denominator /= gcd;
+		return makeFractionString(numerator, denominator);
+	}
+
+	// ------------------------------------------------------------------------------ //
+    // Below is a solution if you use classes
+    //
+    public static String produceAnswerWithClasses(String input)
+    { 
+        // TODO: Implement this function to produce the solution to the input
+        String values[] = input.split(" ");
         MixedFraction value = MixedFraction.fromString(values[0]);
         for (int ii = 1; ii < values.length; ii += 2) {
             MixedFraction v2 = MixedFraction.fromString(values[ii+1]);
@@ -54,9 +203,7 @@ public class FracCalc {
         }
         return value.toString();
     }
-
-    // TODO: Fill in the space below with any helper methods that you think you will need
-
+    
     public static class MixedFraction {
     	
     	// The convention of this class is that the value should
@@ -124,9 +271,9 @@ public class FracCalc {
     			return "" + numerator + "/" + denominator;
     		} else {
     			if (whole > 0) {
-        			return "" + whole + "_" + numerator + "/" + denominator;    				
+        			return "" + whole + "_" + numerator + "/" + denominator;
     			} else {
-        			return "" + whole + "_" + -numerator + "/" + denominator;    				
+        			return "" + whole + "_" + -numerator + "/" + denominator;
     			}
     		}
     	}
