@@ -11,10 +11,12 @@ import java.util.Scanner;
 
 public class ArrayArithmetic {
     public static void main(String[] args) {
-        addOrMultiply();
+        addOrMultiplyFractions();
     }
 
     // -------------------     STEP 1    ---------------------- //
+    // Ask for numbers and print the sum
+
     public static void alwaysAdd() {
         Scanner sc = new Scanner(System.in);
         while (true) {
@@ -38,13 +40,14 @@ public class ArrayArithmetic {
     }
 
     // -------------------     STEP 2    ---------------------- //
+    // Add multiplication
 
     public static void addOrMultiply() {
         int add = 1, mult = 2;
         Scanner sc = new Scanner(System.in);
         while (true) {
             System.out.println("What operation (" + add + " for addition, "
-                + mult + " for multiplication.");
+                + mult + " for multiplication).");
             int operation = sc.nextInt();
             if (operation != add && operation != mult) {
                 System.out.println("Invalid operation, should be " + add
@@ -80,6 +83,7 @@ public class ArrayArithmetic {
     }
 
     // -------------------     STEP 3    ---------------------- //
+    // Split the logic into functions
 
     public static final int ADD = 1;
     public static final int MULT = 2;
@@ -87,7 +91,7 @@ public class ArrayArithmetic {
     public static int getOperation(Scanner sc) {
         while (true) {
             System.out.println("What operation (" + ADD + " for addition, "
-                + MULT + " for multiplication.");
+                + MULT + " for multiplication.)");
             int operation = sc.nextInt();
             if (operation != ADD && operation != MULT) {
                 System.out.println("Invalid operation, should be " + ADD
@@ -140,6 +144,100 @@ public class ArrayArithmetic {
                 total = multiplyArray(arr);
             }
             System.out.println("Total = " + total);
+        }
+        sc.close();
+    }
+    
+    // -------------------     STEP 4    ---------------------- //
+    // Work on fractions
+
+    public static String[] readFracValues(Scanner sc) {
+        System.out.println("How many fractions?");
+        int num_values = sc.nextInt();
+        String[] arr = new String[num_values];
+        for (int ii = 0; ii < num_values; ii++) {
+            System.out.println("What is fraction " + (ii + 1) + "?");
+            arr[ii] = sc.next();
+        }
+        return arr;
+    }
+
+    public static int getFractionNumerator(String fraction) {
+        if (fraction.contains("/")) {
+            String values[] = fraction.split("/");
+            return Integer.parseInt(values[0]);
+        } else {
+            return Integer.parseInt(fraction);
+        }
+    }
+
+    public static int getFractionDenominator(String fraction) {
+        if (fraction.contains("/")) {
+            String values[] = fraction.split("/");
+            return Integer.parseInt(values[1]);
+        } else {
+            return 1;
+        }
+    }
+
+    /**
+     * Euler's GCD algorithm
+     * (https://en.wikipedia.org/wiki/Greatest_common_divisor#Using_Euclid.27s_algorithm)
+     */
+    public static int gcd(int a, int b) {
+        while (true) {
+            if (b == 0) {
+                return a;
+            } else {
+                int temp = a % b;
+                a = b;
+                b = temp;
+            }
+        }
+    }
+
+    public static String reduce(int numerator, int denominator) {
+        int gcd = gcd(numerator, denominator);
+        if (gcd < 0) {
+            gcd *= -1;
+        }
+        numerator /= gcd;
+        denominator /= gcd;
+        return numerator + "/" + denominator;
+    }
+    
+    public static String operateOnFracArray(String[] arr, int operation) {
+        int numerator;
+        int denominator = 1;
+        if (operation == ADD) {
+            numerator = 0;
+        } else {
+            numerator = 1;
+        }
+        for (String value : arr) {
+            int frac_numerator = getFractionNumerator(value);
+            int frac_denominator = getFractionDenominator(value);
+            if (operation == ADD) {
+                numerator *= frac_denominator;
+                numerator += frac_numerator * denominator;
+                denominator *= frac_denominator;
+            } else {
+                numerator *= frac_numerator;
+                denominator *= frac_denominator;
+            }
+        }
+        return reduce(numerator, denominator);
+    }
+
+    public static void addOrMultiplyFractions() {
+        Scanner sc = new Scanner(System.in);
+        while (true) {
+            int operation = getOperation(sc);
+            String[] arr = readFracValues(sc);
+            if (arr.length == 0) {
+                break;
+            }
+            System.out.println("Total = " + operateOnFracArray(arr, operation));
         }
         sc.close();
     }
